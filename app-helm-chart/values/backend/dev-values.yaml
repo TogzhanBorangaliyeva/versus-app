@@ -39,4 +39,4 @@ providerclass:
   name: "versus-secrets"  # Change per environment if needed
   secretName: "secretversus"
   awsSecretName: "versus-aws"
-  #
+  ##
