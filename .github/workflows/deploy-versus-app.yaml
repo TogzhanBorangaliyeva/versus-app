@@ -58,13 +58,13 @@ jobs:
       - name: Login to AWS EKS
         run: "aws eks update-kubeconfig --name redhat-eks-cluster-dev"
 
-      - name: Backend1 - Deploy App to Kubernetes
-        # run: |
-        #   IMAGE_TAG=${{ github.sha }}
-        #   helm upgrade --install versus-app-backend ./app-helm-chart/ \
-        #     --values ./app-helm-chart/values/backend/dev-values.yaml \
-        #     --set image.tag=$IMAGE_TAG \
-        #     --namespace versus-app --create-namespace
+      # - name: Backend1 - Deploy App to Kubernetes
+      #   run: |
+      #     IMAGE_TAG=${{ github.sha }}
+      #     helm upgrade --install versus-app-backend ./app-helm-chart/ \
+      #       --values ./app-helm-chart/values/backend/dev-values.yaml \
+      #       --set image.tag=$IMAGE_TAG \
+      #       --namespace versus-app --create-namespace
 
       - name: Frontend - Build, tag, and push docker image to Amazon ECR
         env:
