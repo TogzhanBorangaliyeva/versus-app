@@ -29,8 +29,8 @@ appConfig:
     key_name: MYSQL_DATABASE
     secret_name: secretversus
   envVars: []
-# tls:
-#   enabled: true
+tls:
+  enabled: false #true
 #   secretName: versus-tls
 volumes:
   enabled: true

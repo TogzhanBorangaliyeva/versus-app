@@ -18,8 +18,8 @@ appConfig:
   envVars:
   - env_name: REACT_APP_API_URL
     env_value: "https://backend.togzhanborangali.click"
-# tls:
-#   enabled: true
+tls:
+  enabled: false #true
 #   secretName: versus-tls
 volumes:
   enabled: false
