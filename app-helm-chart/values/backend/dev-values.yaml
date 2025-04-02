@@ -1,0 +1,41 @@
+appName: versus-app-backend
+appLabel: backend
+replicaCount: 1
+image:
+  repo: 539247466139.dkr.ecr.us-east-1.amazonaws.com/versus/backend
+port: 8080 
+hostname: backend.togzhanborangali.click
+serviceAccount:
+  create: true             # This creates the service account if true
+  name: versusaccount      # This is the name of the service account
+  roleArn: arn:aws:iam::539247466139:role/eksctl-redhat-eks-cluster-dev-addon-iamservic-Role1-QsFDxChmYFN7
+ingress:
+  enabled: true
+appConfig:
+  secrets:
+  - env_name: MYSQL_HOST
+    key_name: MYSQL_HOST
+    secret_name: secretversus
+  - env_name: MYSQL_PORT
+    key_name: MYSQL_PORT
+    secret_name: secretversus
+  - env_name: MYSQL_USER
+    key_name: MYSQL_USER
+    secret_name: secretversus
+  - env_name: MYSQL_PASSWORD
+    key_name: MYSQL_PASSWORD
+    secret_name: secretversus
+  - env_name: MYSQL_DATABASE
+    key_name: MYSQL_DATABASE
+    secret_name: secretversus
+  envVars: []
+# tls:
+#   enabled: true
+#   secretName: versus-tls
+volumes:
+  enabled: true
+providerclass:
+  enabled: true
+  name: "versus-secrets"  # Change per environment if needed
+  secretName: "secretversus"
+  awsSecretName: "versus-aws"

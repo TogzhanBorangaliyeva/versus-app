@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  namespace: versus-app
+  labels:
+    app: {{ .Values.appLabel }}
+spec:
+  replicas: {{ .Values.replicaCount }}  
+  selector:
+    matchLabels:
+      app: {{ .Values.appLabel }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appLabel }}
+    spec:
+       {{- if .Values.serviceAccount.enabled }}
+      serviceAccountName: {{ .Values.serviceAccount.serviceAccountName }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.appLabel }}
+          # imagePullPolicy: Always
+          image: "{{ .Values.image.repo }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.port }}
+          env:
+            {{- range .Values.appConfig.secrets }}
+            - name: {{ .env_name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret_name }}
+                  key: {{ .key_name }}
+            {{- end }}
+            {{- range .Values.appConfig.envVars }}
+            - name: {{ .env_name }}
+              value: {{ .env_value }}
+            {{- end }}
+          {{- if .Values.volumes.enabled }}
+          volumeMounts:
+          - name: secrets-store-inline
+            mountPath: "/mnt/secrets-store"
+            readOnly: true
+          {{- end }}
+      {{- if .Values.volumes.enabled }}
+      volumes:
+      - name: secrets-store-inline
+        csi:
+           driver: secrets-store.csi.k8s.io
+           readOnly: true
+           volumeAttributes:
+             secretProviderClass: "{{ .Values.providerclass.name }}"
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.appName }}-svc"
+  namespace: versus-app
+spec:
+  selector:
+    app: {{ .Values.appLabel }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.port }}
+      targetPort: {{ .Values.port }}
+  type: ClusterIP
+---
+{{ if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Values.appName }}-ingress"
+  namespace: versus-app
+  annotations: 
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "{{ .Values.appName }}-svc"
+            port:
+              number: {{ .Values.port }}
+  ingressClassName: nginx
+  {{ if .Values.tls.enabled }}
+  tls:
+  - hosts:
+      - {{ .Values.hostname }}
+    # name of tls secret created in the 1st step
+    secretName: {{ .Values.tls.secretName }}
+  {{ end }}
+{{ end }}
+
+
+---
+{{- if .Values.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceAccount.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.serviceAccount.roleArn }}
+  labels:
+    app.kubernetes.io/managed-by: eksctl
+{{- end }}
+
+---
+
+
+
+{{- if .Values.providerclass.enabled }}
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: {{ .Values.providerclass.name }}
+  namespace: versus-app
+spec:
+  provider: aws
+  secretObjects:
+  - secretName: {{ .Values.providerclass.secretName }}
+    type: Opaque
+    data: 
+      - objectName: MYSQL_HOST
+        key: MYSQL_HOST
+      - objectName: MYSQL_PORT
+        key: MYSQL_PORT
+      - objectName: MYSQL_USER
+        key: MYSQL_USER
+      - objectName: MYSQL_PASSWORD
+        key: MYSQL_PASSWORD
+      - objectName: MYSQL_DATABASE
+        key: MYSQL_DATABASE
+  parameters:
+    objects: |
+      - objectName: "{{ .Values.providerclass.awsSecretName }}"
+        objectType: "secretsmanager"
+        jmesPath: 
+          - path: "MYSQL_HOST"
+            objectAlias: "MYSQL_HOST"
+          - path: "MYSQL_PORT"
+            objectAlias: "MYSQL_PORT"
+          - path: "MYSQL_USER"
+            objectAlias: "MYSQL_USER"
+          - path: "MYSQL_PASSWORD"
+            objectAlias: "MYSQL_PASSWORD"
+          - path: "MYSQL_DATABASE"
+            objectAlias: "MYSQL_DATABASE"
+{{- end }}
+
+

@@ -1,0 +1,27 @@
+appName: versus-app-frontend
+appLabel: frontend
+replicaCount: 1
+image:
+  repo: 539247466139.dkr.ecr.us-east-1.amazonaws.com/versus/frontend
+port: 8080 
+serviceAccount:
+  serviceAccount:
+  create: false   # Disable service account creation
+  name: ""        # Leave empty if not creating
+  roleArn: ""     # No role ARN needed if not creating a service account
+namespace: versus-app
+ingress:
+  enabled: true
+hostname: frontend.togzhanborangali.click
+appConfig:
+  secrets: []
+  envVars:
+  - env_name: REACT_APP_API_URL
+    env_value: "https://backend.togzhanborangali.click"
+# tls:
+#   enabled: true
+#   secretName: versus-tls
+volumes:
+  enabled: false
+providerclass:
+  enabled: false
