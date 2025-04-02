@@ -7,6 +7,7 @@ port: 8080
 hostname: backend.togzhanborangali.click
 serviceAccount:
   create: true             # This creates the service account if true
+  enabled: true
   name: versusaccount      # This is the name of the service account
   roleArn: arn:aws:iam::539247466139:role/eksctl-redhat-eks-cluster-dev-addon-iamservic-Role1-QsFDxChmYFN7
 ingress:

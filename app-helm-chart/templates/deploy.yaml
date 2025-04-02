@@ -72,9 +72,9 @@ kind: Ingress
 metadata:
   name: "{{ .Values.appName }}-ingress"
   namespace: versus-app
-  annotations: 
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  # annotations: 
+  #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  #   nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   rules:
   - host: {{ .Values.hostname }}
